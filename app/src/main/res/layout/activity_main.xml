@@ -10,8 +10,12 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.ynaito.mediaplayer_sample.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <SurfaceView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/surfaceview"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        tools:context=".MainActivity" />
+
 </RelativeLayout>
