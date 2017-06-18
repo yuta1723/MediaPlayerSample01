@@ -3,6 +3,7 @@ package com.ynaito.mediaplayer_sample;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,11 +16,13 @@ import android.widget.RelativeLayout;
 
 import java.io.IOException;
 
-public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback {
+public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback, MediaPlayer.OnErrorListener, MediaPlayer.OnInfoListener {
     private String TAG = MainActivity.class.getSimpleName();
 
     private Context mContext;
     private String uriString = "http://domain/path/content.mp4";
+//    private String uriString = "https://tungsten.aaplimg.com/VOD/bipbop_adv_example_hevc/master.m3u8";
+//    private String uriString = "https://tungsten.aaplimg.com/VOD/bipbop_adv_example_hevc/v10/prog_index.m3u8";
     MediaPlayer mMediaPlayer = null;
     SurfaceView mSurfaceView = null;
 
@@ -61,6 +64,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     protected void onPause() {
         super.onPause();
         Log.d(TAG, "onPause");
+        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+            mMediaPlayer.pause();
+        }
     }
 
     @Override
@@ -73,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     protected void onRestart() {
         super.onRestart();
         Log.d(TAG, "onRestart");
+        if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
+            mMediaPlayer.start();
+        }
     }
 
     @Override
@@ -95,10 +104,16 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             mMediaPlayer.prepare();
         } catch (IOException e) {
             Log.d(TAG, "Stream read error : " + e);
+            mMediaPlayer.release();
             return;
         }
         setVideoLayoutParams();
         mMediaPlayer.start();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            for (MediaPlayer.TrackInfo trackInfo : mMediaPlayer.getTrackInfo()) {
+                Log.d(TAG, "mediaPlayer.getTrachInfo" + trackInfo);
+            }
+        }
     }
 
     private void setVideoLayoutParams() {
@@ -109,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         int videoWidth = mMediaPlayer.getVideoWidth();
         int videoHeight = mMediaPlayer.getVideoHeight();
         int surfaceHeight = (int) (display.getWidth() * (1.0 * videoHeight / videoWidth));
-        Log.d(TAG,"display.getHeight" + surfaceHeight);
+        Log.d(TAG, "display.getHeight" + surfaceHeight);
         mSurfaceView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, surfaceHeight));
     }
 
@@ -126,6 +141,18 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             mMediaPlayer.stop();
         }
         mMediaPlayer = null;
+    }
+
+    @Override
+    public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
+        Log.d(TAG, "onError i " + i + " i1 " + i1);
+        return false;
+    }
+
+    @Override
+    public boolean onInfo(MediaPlayer mediaPlayer, int i, int i1) {
+        Log.d(TAG, "onInfo i " + i + " i1 " + i1);
+        return false;
     }
 }
 
