@@ -12,6 +12,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import java.io.IOException;
@@ -25,6 +26,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 //    private String uriString = "https://tungsten.aaplimg.com/VOD/bipbop_adv_example_hevc/v10/prog_index.m3u8";
     MediaPlayer mMediaPlayer = null;
     SurfaceView mSurfaceView = null;
+    Button mButton1 = null;
+    Button mButton2 = null;
 
 
     @Override
@@ -43,6 +46,30 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     mMediaPlayer.pause();
                 } else if ((mMediaPlayer != null && !mMediaPlayer.isPlaying())) {
                     mMediaPlayer.start();
+                }
+            }
+        });
+
+        mButton1 = (Button) findViewById(R.id.seek_backward);
+
+        mButton1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+                    Log.d(TAG, "seek to backward to " + (mMediaPlayer.getCurrentPosition() - 10000));
+                    mMediaPlayer.seekTo(mMediaPlayer.getCurrentPosition() - 10000);
+                }
+            }
+        });
+
+        mButton2 = (Button) findViewById(R.id.seek_forward);
+
+        mButton2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+                    Log.d(TAG, "seek to forward to " + (mMediaPlayer.getCurrentPosition() + 10000));
+                    mMediaPlayer.seekTo(mMediaPlayer.getCurrentPosition() + 10000);
                 }
             }
         });
@@ -120,10 +147,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         if (mMediaPlayer == null || mSurfaceView == null) {
             return;
         }
-        Display display = this.getWindowManager().getDefaultDisplay();
+        RelativeLayout layout = (RelativeLayout)findViewById(R.id.activity_main);
+        int layoutWidth = layout.getWidth();
         int videoWidth = mMediaPlayer.getVideoWidth();
         int videoHeight = mMediaPlayer.getVideoHeight();
-        int surfaceHeight = (int) (display.getWidth() * (1.0 * videoHeight / videoWidth));
+        int surfaceHeight = (int) (layoutWidth * (1.0 * videoHeight / videoWidth));
         Log.d(TAG, "display.getHeight" + surfaceHeight);
         mSurfaceView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, surfaceHeight));
     }
