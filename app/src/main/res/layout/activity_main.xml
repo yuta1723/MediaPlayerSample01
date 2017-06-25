@@ -13,11 +13,17 @@
         android:layout_height="wrap_content"
         tools:context=".MainActivity" />
 
+    <SeekBar
+        android:id="@+id/seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/surfaceview"/>
+
     <Button
         android:id="@+id/seek_backward"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/surfaceview"
+        android:layout_below="@+id/seekbar"
         android:text="backward"/>
 
     <Button
@@ -25,7 +31,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignRight="@+id/surfaceview"
-        android:layout_below="@+id/surfaceview"
+        android:layout_below="@+id/seekbar"
         android:text="forward"/>
 
 

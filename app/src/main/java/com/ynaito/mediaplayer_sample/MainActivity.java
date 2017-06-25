@@ -7,13 +7,13 @@ import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 
 import java.io.IOException;
 
@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     Button mButton1 = null;
     Button mButton2 = null;
 
+    SeekBar mSeekbar = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +74,42 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 }
             }
         });
+
+        mSeekbar = (SeekBar) findViewById(R.id.seekbar);
+        mSeekbar.setMax(10000);
+        mSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            private boolean isPlayingWhenStartToSeek = false;
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                int progress = seekBar.getProgress();
+                Log.d(TAG,"progress : " + progress);
+                if (mMediaPlayer != null) {
+                    int seekPosition = (int) (mMediaPlayer.getDuration() * ((double) progress / (double) 10000));
+                    mMediaPlayer.seekTo(seekPosition);
+                    Log.d(TAG,"seekPosition : " + seekPosition);
+                }
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                Log.d(TAG,"seek start");
+                if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+                    mMediaPlayer.pause();
+                    isPlayingWhenStartToSeek = true;
+                }
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                Log.d(TAG,"seek stop");
+                if (mMediaPlayer != null && isPlayingWhenStartToSeek) {
+                    mMediaPlayer.start();
+                }
+            }
+        });
+
+
     }
 
     @Override
