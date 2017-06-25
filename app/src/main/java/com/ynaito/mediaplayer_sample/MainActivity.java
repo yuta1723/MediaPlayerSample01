@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,13 +24,18 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private Context mContext;
     private String uriString = "http://domain/path/content.mp4";
 //    private String uriString = "https://tungsten.aaplimg.com/VOD/bipbop_adv_example_hevc/master.m3u8";
+//    private String uriString = "https://tungsten.aaplimg.com/VOD/bipbop_adv_example_hevc/master.m3u8";
+//    private String uriString = "https://tungsten.aaplimg.com/VOD/bipbop_adv_example_hevc/v13/prog_index.m3u8";
 //    private String uriString = "https://tungsten.aaplimg.com/VOD/bipbop_adv_example_hevc/v10/prog_index.m3u8";
-    MediaPlayer mMediaPlayer = null;
-    SurfaceView mSurfaceView = null;
-    Button mButton1 = null;
-    Button mButton2 = null;
+    private MediaPlayer mMediaPlayer = null;
+    private SurfaceView mSurfaceView = null;
+    private Button mButton1 = null;
+    private Button mButton2 = null;
 
-    SeekBar mSeekbar = null;
+    private SeekBar mSeekbar = null;
+    private Handler mHandler = null;
+    private MonitorTask monitorTask = null;
+    private long POST_DELAY_TIME = 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +43,10 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_main);
         mContext = this;
+        mHandler = new Handler();
         mSurfaceView = (SurfaceView) findViewById(R.id.surfaceview);
         mSurfaceView.getHolder().addCallback(this);
+        monitorTask = new MonitorTask();
 
         mSurfaceView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,21 +87,27 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         mSeekbar.setMax(10000);
         mSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             private boolean isPlayingWhenStartToSeek = false;
+            private boolean isTouchSeekbar = false;
+
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 int progress = seekBar.getProgress();
-                Log.d(TAG,"progress : " + progress);
+                Log.d(TAG, "onProgressChanged" + "progress : " + progress);
+                if (!isTouchSeekbar) {
+                    return;
+                }
                 if (mMediaPlayer != null) {
                     int seekPosition = (int) (mMediaPlayer.getDuration() * ((double) progress / (double) 10000));
                     mMediaPlayer.seekTo(seekPosition);
-                    Log.d(TAG,"seekPosition : " + seekPosition);
+                    Log.d(TAG, "seekPosition : " + seekPosition);
                 }
 
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                Log.d(TAG,"seek start");
+                Log.d(TAG, "onStartTrackingTouch");
+                isTouchSeekbar = true;
                 if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
                     mMediaPlayer.pause();
                     isPlayingWhenStartToSeek = true;
@@ -102,7 +116,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                Log.d(TAG,"seek stop");
+                Log.d(TAG, "onStopTrackingTouch");
+                isTouchSeekbar = false;
                 if (mMediaPlayer != null && isPlayingWhenStartToSeek) {
                     mMediaPlayer.start();
                 }
@@ -131,6 +146,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
             mMediaPlayer.pause();
         }
+        if (mHandler != null) {
+            mHandler.removeCallbacks(null);
+        }
     }
 
     @Override
@@ -146,6 +164,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
             mMediaPlayer.start();
         }
+        if (mHandler != null) {
+            mHandler.postDelayed(monitorTask, POST_DELAY_TIME);
+        }
     }
 
     @Override
@@ -156,6 +177,10 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             mMediaPlayer.stop();
         }
         mMediaPlayer = null;
+        if (mHandler != null) {
+            mHandler.removeCallbacks(null);
+        }
+        mHandler = null;
     }
 
     @Override
@@ -178,13 +203,14 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 Log.d(TAG, "mediaPlayer.getTrachInfo" + trackInfo);
             }
         }
+        mHandler.postDelayed(monitorTask, POST_DELAY_TIME);
     }
 
     private void setVideoLayoutParams() {
         if (mMediaPlayer == null || mSurfaceView == null) {
             return;
         }
-        RelativeLayout layout = (RelativeLayout)findViewById(R.id.activity_main);
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.activity_main);
         int layoutWidth = layout.getWidth();
         int videoWidth = mMediaPlayer.getVideoWidth();
         int videoHeight = mMediaPlayer.getVideoHeight();
@@ -218,6 +244,43 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     public boolean onInfo(MediaPlayer mediaPlayer, int i, int i1) {
         Log.d(TAG, "onInfo i " + i + " i1 " + i1);
         return false;
+    }
+
+
+    private void monitorPlayer() {
+        if (mMediaPlayer == null) {
+            return;
+        }
+        long currentPosition = mMediaPlayer.getCurrentPosition();
+        long duration = mMediaPlayer.getDuration();
+        Log.d(TAG, "currentPosition : " + currentPosition + " duration : " + duration);
+        if (currentPosition >= duration) {
+            Log.d(TAG, "playback complete ");
+//            return;
+        }
+        syncSeekbar(currentPosition, duration);
+    }
+
+    private void syncSeekbar(long currentPosition, long duration) {
+        if (mSeekbar == null) {
+            return;
+        }
+        if (currentPosition < 0 || duration < 0) {
+            return;
+        }
+        int progress = 0;
+        if (currentPosition != 0 && duration != 0) {
+            progress = (int) (10000 * ((double) currentPosition / (double) duration));
+        }
+        mSeekbar.setProgress(progress);
+    }
+
+    private class MonitorTask implements Runnable {
+        @Override
+        public void run() {
+            monitorPlayer();
+            mHandler.postDelayed(monitorTask, POST_DELAY_TIME);
+        }
     }
 }
 
