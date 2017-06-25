@@ -5,9 +5,14 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -29,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 //    private String uriString = "https://tungsten.aaplimg.com/VOD/bipbop_adv_example_hevc/v10/prog_index.m3u8";
     private MediaPlayer mMediaPlayer = null;
     private SurfaceView mSurfaceView = null;
+//    private MySurfaceView mSurfaceView = null;
     private Button mButton1 = null;
     private Button mButton2 = null;
 
@@ -36,6 +42,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private Handler mHandler = null;
     private MonitorTask monitorTask = null;
     private long POST_DELAY_TIME = 1000;
+
+    private GestureDetector gesture;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             }
         });
 
+//        gesture = new GestureDetector(this,gestureListener);
 
     }
 
@@ -281,6 +290,68 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             monitorPlayer();
             mHandler.postDelayed(monitorTask, POST_DELAY_TIME);
         }
+//    }
+//
+//    private final GestureDetector.SimpleOnGestureListener gestureListener = new GestureDetector.SimpleOnGestureListener() {
+//
+//        @Override
+//        public boolean onSingleTapUp(MotionEvent e) {
+//            Log.d(TAG, "onSingleTapUp");
+//            return super.onSingleTapUp(e);
+//        }
+//
+//        @Override
+//        public void onLongPress(MotionEvent e) {
+//            Log.d(TAG, "onLongPress");
+//            super.onLongPress(e);
+//        }
+//
+//        @Override
+//        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+//            Log.d(TAG, "onFling");
+//            return super.onFling(e1, e2, velocityX, velocityY);
+//        }
+//
+//        @Override
+//        public boolean onDoubleTap(MotionEvent e) {
+//            Log.d(TAG, "onDoubleTap");
+//
+//            return super.onDoubleTap(e);
+//        }
+//
+//        @Override
+//        public boolean onDoubleTapEvent(MotionEvent e) {
+//            Log.d(TAG, "onDoubleTapEvent");
+//            return super.onDoubleTapEvent(e);
+//        }
+//    };
+//
+//    private class MySurfaceView extends SurfaceView {
+//
+//        public MySurfaceView(Context context) {
+//            super(context);
+//        }
+//
+//        public MySurfaceView(Context context, AttributeSet attrs) {
+//            super(context, attrs);
+//        }
+//
+//        public MySurfaceView(Context context, AttributeSet attrs, int defStyleAttr) {
+//            super(context, attrs, defStyleAttr);
+//        }
+//
+//        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+//        public MySurfaceView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+//            super(context, attrs, defStyleAttr, defStyleRes);
+//        }
+//
+//        @Override
+//        public boolean onTouchEvent(MotionEvent event) {
+//            if (gesture == null) {
+//                return super.onTouchEvent(event);
+//            }
+//            return gesture.onTouchEvent(event);
+//        }
     }
 }
 
