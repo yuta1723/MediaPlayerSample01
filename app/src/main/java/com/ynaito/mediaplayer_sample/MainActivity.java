@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -18,7 +17,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
-import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -43,9 +41,12 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private SeekBar mSeekbar = null;
     private Handler mHandler = null;
     private MonitorTask monitorTask = null;
-    private long POST_DELAY_TIME = 1000;
+    private long POST_DELAY_MONITOR_TIME = 10000;
+    private long POST_DELAY_HIDDEN_CONTROLLER_TIME = 3000;
 
     private GestureDetector gesture;
+
+    private boolean visibleController = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +55,35 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         setContentView(R.layout.activity_main);
         mContext = this;
         mHandler = new Handler();
+//        mHandler = new Handler() {
+//            @Override
+//            public void handleMessage(Message msg) {
+//                MainActivity.handleMessage(msg);
+//
+//            }
+//        };
         mSurfaceView = (SurfaceView) findViewById(R.id.surfaceview);
         mPlayerLayout = (RelativeLayout) findViewById(R.id.playerLayout);
         mPlayPauseImage = (ImageView) findViewById(R.id.play_button_image);
         mSurfaceView.getHolder().addCallback(this);
         monitorTask = new MonitorTask();
+
+
+        mSurfaceView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!visibleController) {
+                    Log.d(TAG, "controller is invisible ");
+                    showController();
+                    mHandler.removeCallbacks(r);
+                    mHandler.postDelayed(r, POST_DELAY_HIDDEN_CONTROLLER_TIME);
+                } else {
+                    Log.d(TAG, "controller is visible ");
+
+                }
+            }
+        });
+
 
         mPlayPauseImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,6 +94,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 } else if ((mMediaPlayer != null && !mMediaPlayer.isPlaying())) {
                     mMediaPlayer.start();
                     mPlayPauseImage.setImageResource(R.mipmap.exo_controls_pause);
+                    //todo 以下をmethod化する
+                    mHandler.removeCallbacks(r);
+                    mHandler.postDelayed(r, POST_DELAY_HIDDEN_CONTROLLER_TIME);
                 }
             }
         });
@@ -137,7 +165,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 }
             }
         });
-
 //        gesture = new GestureDetector(this,gestureListener);
 
     }
@@ -180,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             mMediaPlayer.start();
         }
         if (mHandler != null) {
-            mHandler.postDelayed(monitorTask, POST_DELAY_TIME);
+            mHandler.postDelayed(monitorTask, POST_DELAY_MONITOR_TIME);
         }
     }
 
@@ -218,7 +245,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 Log.d(TAG, "mediaPlayer.getTrachInfo" + trackInfo);
             }
         }
-        mHandler.postDelayed(monitorTask, POST_DELAY_TIME);
+        mHandler.postDelayed(monitorTask, POST_DELAY_MONITOR_TIME);
+        mHandler.removeCallbacks(r);
+        mHandler.postDelayed(r, POST_DELAY_HIDDEN_CONTROLLER_TIME);
     }
 
     private void setVideoLayoutParams() {
@@ -294,9 +323,43 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         @Override
         public void run() {
             monitorPlayer();
-            mHandler.postDelayed(monitorTask, POST_DELAY_TIME);
+            mHandler.postDelayed(monitorTask, POST_DELAY_MONITOR_TIME);
         }
     }
+
+    final Runnable r = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(5000);
+                hideController();
+            } catch (InterruptedException e) {
+                Log.d(TAG, "InterruptedException " + e);
+            }
+        }
+    };
+
+    private void showController() {
+        mPlayPauseImage.setVisibility(View.VISIBLE);
+        visibleController = true;
+    }
+
+    private void hideController() {
+        mPlayPauseImage.setVisibility(View.GONE);
+        visibleController = false;
+    }
+
+//    private static void handleMessage(Message msg) {
+//        switch (msg.what) {
+//            case SHOW_CONTROLLER:
+//                break;
+//            case HIDE_CONTROLLER:
+//                break;
+//            case MONITOR_PLAYER:
+//            default:
+//                break;
+//        }
+//    }
 //    }
 //
 //    private final GestureDetector.SimpleOnGestureListener gestureListener = new GestureDetector.SimpleOnGestureListener() {
