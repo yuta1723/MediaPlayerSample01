@@ -4,22 +4,21 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
-import android.support.annotation.RequiresApi;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.AttributeSet;
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.MotionEvent;
-import android.view.Surface;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -34,7 +33,10 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 //    private String uriString = "https://tungsten.aaplimg.com/VOD/bipbop_adv_example_hevc/v10/prog_index.m3u8";
     private MediaPlayer mMediaPlayer = null;
     private SurfaceView mSurfaceView = null;
+    private RelativeLayout mPlayerLayout = null;
 //    private MySurfaceView mSurfaceView = null;
+
+    private ImageView mPlayPauseImage = null;
     private Button mButton1 = null;
     private Button mButton2 = null;
 
@@ -53,16 +55,20 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         mContext = this;
         mHandler = new Handler();
         mSurfaceView = (SurfaceView) findViewById(R.id.surfaceview);
+        mPlayerLayout = (RelativeLayout) findViewById(R.id.playerLayout);
+        mPlayPauseImage = (ImageView) findViewById(R.id.play_button_image);
         mSurfaceView.getHolder().addCallback(this);
         monitorTask = new MonitorTask();
 
-        mSurfaceView.setOnClickListener(new View.OnClickListener() {
+        mPlayPauseImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
                     mMediaPlayer.pause();
+                    mPlayPauseImage.setImageResource(R.mipmap.exo_controls_play);
                 } else if ((mMediaPlayer != null && !mMediaPlayer.isPlaying())) {
                     mMediaPlayer.start();
+                    mPlayPauseImage.setImageResource(R.mipmap.exo_controls_pause);
                 }
             }
         });
@@ -225,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         int videoHeight = mMediaPlayer.getVideoHeight();
         int surfaceHeight = (int) (layoutWidth * (1.0 * videoHeight / videoWidth));
         Log.d(TAG, "display.getHeight" + surfaceHeight);
-        mSurfaceView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, surfaceHeight));
+        mPlayerLayout.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, surfaceHeight));
     }
 
     @Override
@@ -290,6 +296,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             monitorPlayer();
             mHandler.postDelayed(monitorTask, POST_DELAY_TIME);
         }
+    }
 //    }
 //
 //    private final GestureDetector.SimpleOnGestureListener gestureListener = new GestureDetector.SimpleOnGestureListener() {
@@ -352,6 +359,5 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 //            }
 //            return gesture.onTouchEvent(event);
 //        }
-    }
 }
 

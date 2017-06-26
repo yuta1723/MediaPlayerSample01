@@ -6,33 +6,48 @@
     android:layout_height="match_parent"
     tools:context="com.ynaito.mediaplayer_sample.MainActivity">
 
-    <SurfaceView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/surfaceview"
+    <RelativeLayout
+        android:id="@+id/playerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".MainActivity" />
+        android:gravity="center|top">
+
+        <SurfaceView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/surfaceview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:context=".MainActivity" />
+
+        <ImageView
+            android:id="@+id/play_button_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:src="@mipmap/exo_controls_pause"
+            android:layout_centerInParent="true" />
+    </RelativeLayout>
 
     <SeekBar
         android:id="@+id/seekbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/surfaceview"/>
+        android:layout_below="@+id/playerLayout" />
 
     <Button
         android:id="@+id/seek_backward"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/seekbar"
-        android:text="backward"/>
+        android:text="backward" />
 
     <Button
         android:id="@+id/seek_forward"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/surfaceview"
+        android:layout_alignRight="@+id/playerLayout"
         android:layout_below="@+id/seekbar"
-        android:text="forward"/>
+        android:text="forward" />
 
 
 </RelativeLayout>
