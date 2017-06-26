@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private SeekBar mSeekbar = null;
     private Handler mHandler = null;
     private MonitorTask monitorTask = null;
-    private long POST_DELAY_MONITOR_TIME = 10000;
+    private long POST_DELAY_MONITOR_TIME = 1000;
     private long POST_DELAY_HIDDEN_CONTROLLER_TIME = 3000;
 
     private GestureDetector gesture;
@@ -72,6 +72,10 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         mSurfaceView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (mMediaPlayer == null || !mMediaPlayer.isPlaying()) {
+                    return;
+                }
+                //playing時のみshow/hide controllerを行う。
                 if (!visibleController) {
                     Log.d(TAG, "controller is invisible ");
                     showController();
@@ -91,6 +95,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
                     mMediaPlayer.pause();
                     mPlayPauseImage.setImageResource(R.mipmap.exo_controls_play);
+                    mHandler.removeCallbacks(r);
+                    showController();
                 } else if ((mMediaPlayer != null && !mMediaPlayer.isPlaying())) {
                     mMediaPlayer.start();
                     mPlayPauseImage.setImageResource(R.mipmap.exo_controls_pause);
@@ -330,12 +336,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     final Runnable r = new Runnable() {
         @Override
         public void run() {
-            try {
-                Thread.sleep(5000);
-                hideController();
-            } catch (InterruptedException e) {
-                Log.d(TAG, "InterruptedException " + e);
-            }
+            hideController();
         }
     };
 
