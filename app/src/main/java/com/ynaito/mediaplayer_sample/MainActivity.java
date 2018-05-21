@@ -1,5 +1,6 @@
 package com.ynaito.mediaplayer_sample;
 
+import android.content.ClipData;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -8,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.GestureDetector;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -140,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 int progress = seekBar.getProgress();
-                Log.d(TAG, "onProgressChanged" + "progress : " + progress);
+//                Log.d(TAG, "onProgressChanged" + "progress : " + progress);
                 if (!isTouchSeekbar) {
                     return;
                 }
@@ -246,6 +248,51 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         }
         setVideoLayoutParams();
         mMediaPlayer.start();
+
+        mSurfaceView.setOnDragListener(new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View v, DragEvent event) {
+                Log.d(TAG, "onDrag");
+
+                final int action = event.getAction();
+                switch (action) {
+                    case DragEvent.ACTION_DRAG_STARTED:
+                        Log.d(TAG, "dragEvent,ACTION_DRAG_STARTED");
+                        break;
+                    case DragEvent.ACTION_DRAG_LOCATION:
+                        Log.d(TAG, "dragEvent,ACTION_DRAG_LOCATION");
+                        break;
+                    case DragEvent.ACTION_DROP:
+                        Log.d(TAG, "dragEvent,ACTION_DROP");
+                        break;
+                    case DragEvent.ACTION_DRAG_ENDED:
+                        Log.d(TAG, "dragEvent,ACTION_DRAG_ENDED");
+                        break;
+                    case DragEvent.ACTION_DRAG_ENTERED:
+                        Log.d(TAG, "dragEvent,ACTION_DRAG_ENTERED");
+                        break;
+                    case DragEvent.ACTION_DRAG_EXITED:
+                        Log.d(TAG, "dragEvent,ACTION_DRAG_EXITED");
+                        break;
+                }
+                return true;
+            }
+        });
+
+        mSurfaceView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Log.d(TAG, "onLongClick");
+//                ClipData.Item item = new ClipData.Item(v.getTag().toString());
+//                ClipData dragData = new ClipData(v.getTag(),,item);
+                View.DragShadowBuilder myShadow = new View.DragShadowBuilder();
+
+                v.startDrag(null, myShadow, null, 0);
+                return false;
+            }
+        });
+
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             for (MediaPlayer.TrackInfo trackInfo : mMediaPlayer.getTrackInfo()) {
                 Log.d(TAG, "mediaPlayer.getTrachInfo" + trackInfo);
@@ -303,7 +350,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         }
         long currentPosition = mMediaPlayer.getCurrentPosition();
         long duration = mMediaPlayer.getDuration();
-        Log.d(TAG, "currentPosition : " + currentPosition + " duration : " + duration);
+//        Log.d(TAG, "currentPosition : " + currentPosition + " duration : " + duration);
         if (currentPosition >= duration) {
             Log.d(TAG, "playback complete ");
 //            return;
@@ -425,3 +472,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 //        }
 }
 
+
+// https://developer.android.com/guide/topics/ui/drag-drop
+// https://qiita.com/umechanhika/items/56add1e55f0ed921a596
