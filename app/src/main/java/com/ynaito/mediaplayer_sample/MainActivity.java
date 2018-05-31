@@ -329,7 +329,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         @Override
         public void run() {
             monitorPlayer();
-            mHandler.postDelayed(monitorTask, POST_DELAY_MONITOR_TIME);
+            if(mHandler != null) {
+                mHandler.postDelayed(monitorTask, POST_DELAY_MONITOR_TIME);
+            }
         }
     }
 
