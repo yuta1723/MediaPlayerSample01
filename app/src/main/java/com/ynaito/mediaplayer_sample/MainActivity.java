@@ -250,6 +250,12 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         mMediaPlayer.start();
 
         mSurfaceView.setOnDragListener(new View.OnDragListener() {
+
+            private float startDragPosX;
+            private float startDragPosY;
+            private float endDragPosX;
+            private float endDragPosY;
+
             @Override
             public boolean onDrag(View v, DragEvent event) {
                 Log.d(TAG, "onDrag");
@@ -258,21 +264,37 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 switch (action) {
                     case DragEvent.ACTION_DRAG_STARTED:
                         Log.d(TAG, "dragEvent,ACTION_DRAG_STARTED");
+                        startDragPosX = event.getX();
+                        startDragPosY = event.getY();
                         break;
                     case DragEvent.ACTION_DRAG_LOCATION:
                         Log.d(TAG, "dragEvent,ACTION_DRAG_LOCATION");
+
+                        endDragPosX = event.getX();
+                        endDragPosY = event.getY();
+
+                        int distance = (int)endDragPosY - (int)startDragPosY;
+                        if (distance > 0) {
+                            setViewRect(mSurfaceView,0,distance,0,0);
+                        } else {
+                            setViewRect(mSurfaceView,0,0,0,(-1) * distance);
+                        }
+
+                        Log.d(TAG, "dragEvent : distance =" + distance);
+
                         break;
                     case DragEvent.ACTION_DROP:
-                        Log.d(TAG, "dragEvent,ACTION_DROP");
+//                        Log.d(TAG, "dragEvent,ACTION_DROP");
                         break;
                     case DragEvent.ACTION_DRAG_ENDED:
                         Log.d(TAG, "dragEvent,ACTION_DRAG_ENDED");
+
                         break;
                     case DragEvent.ACTION_DRAG_ENTERED:
-                        Log.d(TAG, "dragEvent,ACTION_DRAG_ENTERED");
+//                        Log.d(TAG, "dragEvent,ACTION_DRAG_ENTERED");
                         break;
                     case DragEvent.ACTION_DRAG_EXITED:
-                        Log.d(TAG, "dragEvent,ACTION_DRAG_EXITED");
+//                        Log.d(TAG, "dragEvent,ACTION_DRAG_EXITED");
                         break;
                 }
                 return true;
@@ -313,7 +335,10 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         int videoHeight = mMediaPlayer.getVideoHeight();
         int surfaceHeight = (int) (layoutWidth * (1.0 * videoHeight / videoWidth));
         Log.d(TAG, "display.getHeight" + surfaceHeight);
-        mPlayerLayout.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, surfaceHeight));
+
+        mSurfaceView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, surfaceHeight));
+
+        mPlayerLayout.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
     }
 
     @Override
@@ -395,6 +420,13 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private void hideController() {
         mPlayPauseImage.setVisibility(View.GONE);
         visibleController = false;
+    }
+
+    private void setViewRect(View v, int left, int top, int right, int bottom) {
+        ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+
+        mlp.setMargins(left, top, right, bottom);
+        v.setLayoutParams(mlp);
     }
 
 //    private static void handleMessage(Message msg) {
