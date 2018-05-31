@@ -248,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         mMediaPlayer.start();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             for (MediaPlayer.TrackInfo trackInfo : mMediaPlayer.getTrackInfo()) {
-                Log.d(TAG, "mediaPlayer.getTrachInfo" + trackInfo);
+                Log.d(TAG, "mediaPlayer.getTrackInfo" + trackInfo);
             }
         }
         mHandler.postDelayed(monitorTask, POST_DELAY_MONITOR_TIME);
